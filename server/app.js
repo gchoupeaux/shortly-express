@@ -21,6 +21,7 @@ app.use(auth.createSession);
 
 app.get('/', 
 (req, res) => {
+  console.log('res.cookie: ', res.cookie.shortlyid);
   res.render('index');
 });
 

@@ -12,8 +12,8 @@ var assignSession = (req, res, next) => {
   })
   .then((session) => {
     req.session.hash = session.hash;
-    res.cookies = {};
-    res.cookies['shortlyid'] = { value: req.session.hash };
+    // res.cookies.shortlyid = {};
+    res.cookie('shortlyid', req.session.hash, {httpOnly: false});
     next();
   });
 };
