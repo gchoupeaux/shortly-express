@@ -3,8 +3,10 @@ const path = require('path');
 const utils = require('./lib/hashUtils');
 const partials = require('express-partials');
 const bodyParser = require('body-parser');
-const Auth = require('./middleware/auth');
+const cookieParser = require('./middleware/cookieParser');
+const auth = require('./middleware/auth');
 const models = require('./models');
+const db = require('./db/index');
 
 const app = express();
 
@@ -14,8 +16,8 @@ app.use(partials());
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(express.static(path.join(__dirname, '../public')));
-
-
+app.use(cookieParser);
+app.use(auth.createSession);
 
 app.get('/', 
 (req, res) => {
@@ -77,7 +79,46 @@ app.post('/links',
 /************************************************************/
 // Write your authentication routes here
 /************************************************************/
+app.post('/signup', 
+(req, res, next) => {
+  
+  models.Users.create({username: req.body.username, password: req.body.password})
+  .then(() => {
+    res.redirect('/');
+  })
+  .catch((err) => {
+    if (err.code === 'ER_DUP_ENTRY') {
+      res.redirect('/signup');
+    } else {
+      throw err;
+    }
+  });  
+});
 
+app.post('/login', 
+(req, res, next) => {
+  var attemptedUsername = req.body.username;
+  var attemptedPassword = req.body.password;
+  // get the login username
+  models.Users.get({username: attemptedUsername})
+  .then((user) => {
+    // check if attempted password matches existing pw and salt
+    if (models.Users.compare(attemptedPassword, user.password, user.salt)) {
+      // If true, redirect to '/'
+      res.redirect('/');
+    } else {
+      // else redirect to '/login'
+      res.redirect('/login');
+    }
+  })
+  .catch((err) => {
+    // if no results
+    if (err) {
+      // then redirect to '/login'
+      res.redirect('/login');
+    }
+  });
+});
 
 
 /************************************************************/
