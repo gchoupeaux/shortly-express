@@ -95,6 +95,10 @@ app.post('/signup',
 (req, res, next) => {
   
   models.Users.create({username: req.body.username, password: req.body.password})
+  .then ((results) => {
+    results.insertId;
+    models.Sessions.update({hash: req.session.hash}, {userId: results.insertId});
+  })
   .then(() => {
     res.redirect('/');
   })

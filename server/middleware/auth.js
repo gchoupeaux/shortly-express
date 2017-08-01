@@ -38,7 +38,7 @@ module.exports.createSession = (req, res, next) => {
     })
     .then((user) => {
       if (user === undefined) {
-        console.log('user undefined');
+        // console.log('user undefined');
       } else {
         req.session.user = {username: user.username};  
         next(); 
@@ -61,11 +61,8 @@ module.exports.createSession = (req, res, next) => {
 module.exports.destroySession = (req, res, next) => {
   models.Sessions.delete({hash: req.cookies.shortlyid})
   .then(() => {
-    console.log('inside destroy session');
     req.session = null;
-    //req.cookies.shortlyid = '';
     res.cookies = [];
-    //res.cookie('shortlyid', '', {expires: true});
     next(); 
   })
   .catch((err) => {
