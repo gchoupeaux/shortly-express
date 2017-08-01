@@ -21,24 +21,35 @@ app.use(auth.createSession);
 
 app.get('/', 
 (req, res) => {
-  console.log('res.cookie: ', res.cookie.shortlyid);
-  res.render('index');
+  if (req.session.userId) {
+    res.render('index');
+  } else {
+    res.redirect('/login');
+  }
 });
 
 app.get('/create', 
 (req, res) => {
-  res.render('index');
+  if (req.session.userId) {
+    res.render('index');
+  } else {
+    res.redirect('/login');
+  }
 });
 
 app.get('/links', 
 (req, res, next) => {
-  models.Links.getAll()
-    .then(links => {
-      res.status(200).send(links);
-    })
-    .error(error => {
-      res.status(500).send(error);
-    });
+  if (req.session.userId) {
+    models.Links.getAll()
+      .then(links => {
+        res.status(200).send(links);
+      })
+      .error(error => {
+        res.status(500).send(error);
+      });
+  } else {
+    res.redirect('/login');
+  }
 });
 
 app.post('/links', 
@@ -96,6 +107,10 @@ app.post('/signup',
   });  
 });
 
+app.get('/signup', (req, res, next) => {
+  res.render('signup');
+});
+
 app.post('/login', 
 (req, res, next) => {
   var attemptedUsername = req.body.username;
@@ -121,7 +136,13 @@ app.post('/login',
   });
 });
 
+app.get('/login', (req, res, next) => {
+  res.render('login');
+});
 
+app.get('/logout', 
+auth.destroySession, 
+(req, res, next) => res.redirect('/login'));
 /************************************************************/
 // Handle the code parameter route last - if all other routes fail
 // assume the route is a short code and try and handle it here.

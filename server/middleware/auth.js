@@ -58,7 +58,20 @@ module.exports.createSession = (req, res, next) => {
 /************************************************************/
 // Add additional authentication middleware functions below
 /************************************************************/
-
+module.exports.destroySession = (req, res, next) => {
+  models.Sessions.delete({hash: req.cookies.shortlyid})
+  .then(() => {
+    console.log('inside destroy session');
+    req.session = null;
+    //req.cookies.shortlyid = '';
+    res.cookies = [];
+    //res.cookie('shortlyid', '', {expires: true});
+    next(); 
+  })
+  .catch((err) => {
+    if (err) { throw err; }
+  });
+};
 
 
 
